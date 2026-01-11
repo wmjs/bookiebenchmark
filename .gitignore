@@ -1,0 +1,30 @@
+# Environment
+config/.env
+.env
+*.pyc
+__pycache__/
+.venv/
+venv/
+
+# Output files
+output/*.mp4
+output/*.mp3
+
+# Database
+data/*.db
+
+# Google credentials
+config/credentials.json
+config/token.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Large video files
+base_highlights/
+example_1.mp4
