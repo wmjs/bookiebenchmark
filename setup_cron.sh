@@ -25,11 +25,8 @@ sed -i '' '/BookieBenchmark/d' "$TEMP_CRON" 2>/dev/null || sed -i '/BookieBenchm
 # Add new cron entries
 cat >> "$TEMP_CRON" << EOF
 
-# BookieBenchmark - Morning pipeline (8 AM daily)
-0 8 * * * cd $SCRIPT_DIR && $PYTHON_PATH main.py morning >> $LOG_DIR/morning.log 2>&1 # BookieBenchmark
-
-# BookieBenchmark - Evening results update (11 PM daily)
-0 23 * * * cd $SCRIPT_DIR && $PYTHON_PATH main.py evening >> $LOG_DIR/evening.log 2>&1 # BookieBenchmark
+# BookieBenchmark - Daily pipeline (5 AM)
+0 5 * * * cd $SCRIPT_DIR && $PYTHON_PATH main.py morning >> $LOG_DIR/daily.log 2>&1 # BookieBenchmark
 EOF
 
 # Install new crontab
@@ -40,8 +37,7 @@ echo ""
 echo "Cron jobs installed successfully!"
 echo ""
 echo "Schedule:"
-echo "  - Morning pipeline: 8:00 AM daily"
-echo "  - Evening results:  11:00 PM daily"
+echo "  - Daily pipeline: 5:00 AM (results + predictions + videos)"
 echo ""
 echo "Logs will be written to: $LOG_DIR"
 echo ""

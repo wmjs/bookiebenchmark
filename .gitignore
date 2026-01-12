@@ -16,6 +16,7 @@ data/*.db
 # Google credentials
 config/credentials.json
 config/token.json
+config/drive_token.json
 
 # OS files
 .DS_Store

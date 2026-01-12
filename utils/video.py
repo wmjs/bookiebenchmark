@@ -142,10 +142,10 @@ def create_caption_frame(
     text: str,
     width: int = OUTPUT_WIDTH,
     height: int = 300,
-    font_size: int = 90,  # Bigger text
+    font_size: int = 100,  # Bigger text
     bg_color: tuple = (0, 0, 0, 0),  # Transparent background
     text_color: tuple = (255, 255, 255, 255),
-    outline_thickness: int = 6  # Thicker outline for bigger text
+    outline_thickness: int = 8  # Thicker outline for bigger text
 ):
     """Create a dramatic caption frame with text - no background, just bold outlined text."""
     img = Image.new("RGBA", (width, height), bg_color)
@@ -295,15 +295,18 @@ def generate_video(
         away_logo_path = find_team_logo(game_info.get("away_team", ""))
 
         # Position team logos HUGE and CENTERED vertically for maximum impact
-        logo_size = 350  # Super big logos
-        logo_y = int(OUTPUT_HEIGHT * 0.30)  # Centered vertically (30% down)
+        logo_size = 500  # Super big logos
+        logo_y = int(OUTPUT_HEIGHT * 0.25)  # Centered vertically (30% down)
         intro_duration = 6.0
+
+        # Calculate symmetric positions
+        edge_padding = 10  # Minimal padding from edges
 
         if away_logo_path:
             away_logo_array = create_logo_clip(str(away_logo_path), size=logo_size)
             away_logo = (
                 ImageClip(away_logo_array)
-                .set_position((80, logo_y))
+                .set_position((edge_padding, logo_y))
                 .set_start(0)
                 .set_duration(intro_duration)
             )
@@ -313,18 +316,20 @@ def generate_video(
             home_logo_array = create_logo_clip(str(home_logo_path), size=logo_size)
             home_logo = (
                 ImageClip(home_logo_array)
-                .set_position((OUTPUT_WIDTH - logo_size - 80, logo_y))
+                .set_position((OUTPUT_WIDTH - logo_size - edge_padding, logo_y))
                 .set_start(0)
                 .set_duration(intro_duration)
             )
             logo_clips.append(home_logo)
 
-        # Add huge "VS" text between team logos - centered
-        vs_img = create_caption_frame("VS", width=350, height=220, font_size=130,
+        # Add huge "VS" text between team logos - centered with logos
+        vs_height = 220
+        vs_img = create_caption_frame("VS", width=350, height=vs_height, font_size=130,
                                        bg_color=(0, 0, 0, 0), text_color=(255, 255, 255, 255))
+        vs_y = logo_y + (logo_size - vs_height) // 2  # Center VS with logos
         vs_clip = (
             ImageClip(vs_img)
-            .set_position(("center", logo_y + 35))
+            .set_position(("center", vs_y))
             .set_start(0)
             .set_duration(intro_duration)
         )
@@ -334,7 +339,7 @@ def generate_video(
         print("  Adding AI logos...")
         ai_mentions = find_ai_mentions(word_timings)
 
-        ai_logo_size = 200  # Big AI logos
+        ai_logo_size = 400  # Big AI logos
         ai_logo_y = 350  # Position below team logos area
 
         for mention in ai_mentions:

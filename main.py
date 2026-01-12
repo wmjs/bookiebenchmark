@@ -23,29 +23,37 @@ from utils.database import init_db
 
 def run_morning_pipeline(skip_content: bool = False, content_limit: int = 3):
     """
-    Run the morning content generation pipeline.
+    Run the full daily pipeline (once per day at 5 AM).
 
     1. Initialize database
-    2. Fetch tomorrow's games
-    3. Fetch Vegas odds
-    4. Get AI predictions for all games
-    5. Generate content for top matchups
-    6. Sync to Google Sheets
+    2. Fetch yesterday's results (update accuracy)
+    3. Fetch tomorrow's games
+    4. Fetch Vegas odds
+    5. Get AI predictions for all games
+    6. Generate content for top matchups
+    7. Upload videos to Google Drive
+    8. Sync to Google Sheets
     """
     from scripts.fetch_games import fetch_and_store_games
     from scripts.fetch_odds import update_games_with_odds
     from scripts.get_predictions import get_predictions_for_date
     from scripts.generate_content import generate_daily_content
+    from scripts.fetch_results import update_yesterdays_results
+    from scripts.upload_drive import upload_todays_videos
     from scripts.sync_sheets import sync_to_sheets
 
     print("\n" + "="*60)
-    print("BOOKIEBENCHMARK - MORNING PIPELINE")
+    print("BOOKIEBENCHMARK - DAILY PIPELINE")
     print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("="*60)
 
     # Initialize database
-    print("\n[1/6] Initializing database...")
+    print("\n[1/8] Initializing database...")
     init_db()
+
+    # Fetch yesterday's results first
+    print("\n[2/8] Fetching yesterday's results...")
+    update_yesterdays_results()
 
     # Get tomorrow's date
     tomorrow = datetime.now() + timedelta(days=1)
@@ -53,38 +61,52 @@ def run_morning_pipeline(skip_content: bool = False, content_limit: int = 3):
     date_db = tomorrow.strftime("%Y-%m-%d")
 
     # Fetch games
-    print(f"\n[2/6] Fetching games for {date_db}...")
+    print(f"\n[3/8] Fetching games for {date_db}...")
     games = fetch_and_store_games(date_api)
     print(f"Found {len(games)} games")
 
     if not games:
-        print("No games tomorrow. Exiting.")
+        print("No games tomorrow. Skipping predictions and content.")
+        print("\n[8/8] Syncing to Google Sheets...")
+        sync_to_sheets()
+        print("\n" + "="*60)
+        print("DAILY PIPELINE COMPLETE")
+        print(f"Finished at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("="*60)
         return
 
     # Fetch odds
-    print(f"\n[3/6] Fetching Vegas odds...")
+    print(f"\n[4/8] Fetching Vegas odds...")
     update_games_with_odds(date_api)
 
     # Get predictions
-    print(f"\n[4/6] Getting AI predictions...")
+    print(f"\n[5/8] Getting AI predictions...")
     predictions = get_predictions_for_date(date_db)
     print(f"Collected {len(predictions)} predictions")
 
     # Generate content
+    videos_created = 0
     if not skip_content:
-        print(f"\n[5/6] Generating content (top {content_limit} matchups)...")
+        print(f"\n[6/8] Generating content (top {content_limit} matchups)...")
         content_results = generate_daily_content(date_db, limit=content_limit)
         videos_created = len([r for r in content_results if r.get('video_path')])
         print(f"Created {videos_created} videos")
     else:
-        print("\n[5/6] Skipping content generation (--skip-content flag)")
+        print("\n[6/8] Skipping content generation (--skip-content flag)")
+
+    # Upload videos to Google Drive
+    if videos_created > 0:
+        print("\n[7/8] Uploading videos to Google Drive...")
+        upload_todays_videos()
+    else:
+        print("\n[7/8] No videos to upload")
 
     # Sync to sheets
-    print("\n[6/6] Syncing to Google Sheets...")
+    print("\n[8/8] Syncing to Google Sheets...")
     sync_to_sheets()
 
     print("\n" + "="*60)
-    print("MORNING PIPELINE COMPLETE")
+    print("DAILY PIPELINE COMPLETE")
     print(f"Finished at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("="*60)
 

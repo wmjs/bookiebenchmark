@@ -39,7 +39,7 @@ def generate_tts(
     text: str,
     output_path: str,
     voice: str = DEFAULT_VOICE,
-    rate: str = "+20%",
+    rate: str = "+25%",
     pitch: str = "+5Hz"
 ) -> Optional[str]:
     """Synchronous wrapper for TTS generation."""
@@ -134,7 +134,7 @@ def generate_tts_with_timing(
     text: str,
     output_path: str,
     voice: str = DEFAULT_VOICE,
-    rate: str = "+20%",
+    rate: str = "+30%",
     pitch: str = "+5Hz"
 ) -> Optional[tuple]:
     """
