@@ -14,7 +14,7 @@ load_dotenv(Path(__file__).parent.parent / "config" / ".env")
 from utils.database import get_interesting_matchups, get_predictions_for_game, get_connection
 from utils.tts import generate_tts_with_timing
 from utils.video import generate_video
-from config.prompts import VOICEOVER_SCRIPT_TEMPLATE, AI_MODELS
+from config.prompts import VOICEOVER_SCRIPT_TEMPLATE, AI_MODELS, get_random_intro
 
 # Use OpenAI for script generation (can switch to others)
 import openai
@@ -47,12 +47,16 @@ def generate_voiceover_script(game: dict, predictions: list) -> str:
         vegas_section = ""  # Don't mention Vegas at all
         vegas_requirement = "- Do NOT mention Vegas or betting lines"
 
+    # Get a random intro hook for variety
+    intro_hook = get_random_intro()
+
     prompt = VOICEOVER_SCRIPT_TEMPLATE.format(
         away_team=game['away_team'],
         home_team=game['home_team'],
         vegas_section=vegas_section,
         vegas_requirement=vegas_requirement,
-        predictions=predictions_text
+        predictions=predictions_text,
+        intro_hook=intro_hook
     )
 
     try:
@@ -73,16 +77,17 @@ def generate_voiceover_script(game: dict, predictions: list) -> str:
 def generate_fallback_script(game: dict, predictions: list) -> str:
     """Generate a basic script without AI."""
     has_vegas = game.get('vegas_favorite') and game.get('vegas_spread')
+    intro_hook = get_random_intro()
 
     if has_vegas:
         lines = [
-            "VEGAS VERSUS THE MACHINES!",
+            intro_hook,
             f"{game['away_team']} takes on {game['home_team']}.",
             f"Vegas has {game['vegas_favorite']} as the favorite.",
         ]
     else:
         lines = [
-            "THE MACHINES HAVE SPOKEN!",
+            intro_hook,
             f"{game['away_team']} takes on {game['home_team']}.",
         ]
 

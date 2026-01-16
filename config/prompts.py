@@ -1,6 +1,33 @@
 """
 Prompt templates for AI predictions and content generation.
 """
+import random
+
+# Varied intro hooks to avoid repetition
+INTRO_HOOKS = [
+    "THE AIs HAVE SPOKEN!",
+    "THE MACHINES HAVE DECIDED!",
+    "SILICON VERSUS SWEAT!",
+    "THE ALGORITHMS HAVE CALCULATED!",
+    "FOUR AIs, ONE WINNER!",
+    "THE BOTS ARE BETTING!",
+    "ARTIFICIAL INTELLIGENCE PICKS!",
+    "THE DIGITAL MINDS WEIGH IN!",
+    "AI SHOWDOWN TIME!",
+    "THE ROBOTS MADE THEIR PICKS!",
+    "MACHINE LEARNING MEETS THE HARDWOOD!",
+    "THE NEURAL NETS HAVE PROCESSED!",
+    "BINARY BRAINS BATTLE IT OUT!",
+    "THE COMPUTERS HAVE CRUNCHED THE NUMBERS!",
+    "AI VERSUS AI!",
+    "THE PREDICTION BOTS ARE LIVE!",
+    "FOUR MODELS, FOUR OPINIONS!",
+    "THE SILICON ANALYSTS SPEAK!",
+]
+
+def get_random_intro():
+    """Get a random intro hook for variety."""
+    return random.choice(INTRO_HOOKS)
 
 PREDICTION_PROMPT = """You are a sports analyst AI making NBA game predictions.
 
@@ -40,7 +67,7 @@ AI PREDICTIONS:
 {predictions}
 
 REQUIREMENTS:
-1. Start with dramatic hook like "THE AIs HAVE SPOKEN" or "THE MACHINES HAVE DECIDED"
+1. Start EXACTLY with this hook: "{intro_hook}"
 2. State the matchup dramatically
 {vegas_requirement}
 3. Go through each AI's pick with their confidence
