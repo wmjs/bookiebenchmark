@@ -16,24 +16,40 @@ from utils.database import get_connection, get_model_stats
 
 
 def get_gspread_client():
-    """Get authenticated gspread client."""
+    """Get authenticated gspread client using OAuth."""
     try:
         import gspread
-        from google.oauth2.service_account import Credentials
+        from google.auth.transport.requests import Request
+        from google.oauth2.credentials import Credentials
+        from google_auth_oauthlib.flow import InstalledAppFlow
 
-        creds_path = Path(__file__).parent.parent / "config" / "credentials.json"
-
-        if not creds_path.exists():
-            print("Google credentials not found. See README for setup instructions.")
-            return None
+        config_path = Path(__file__).parent.parent / "config"
+        creds_path = config_path / "credentials.json"
+        token_path = config_path / "sheets_token.json"
 
         scopes = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive"
         ]
 
-        credentials = Credentials.from_service_account_file(str(creds_path), scopes=scopes)
-        client = gspread.authorize(credentials)
+        creds = None
+        if token_path.exists():
+            creds = Credentials.from_authorized_user_file(str(token_path), scopes)
+
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                if not creds_path.exists():
+                    print("Google credentials not found. See README for setup instructions.")
+                    return None
+                flow = InstalledAppFlow.from_client_secrets_file(str(creds_path), scopes)
+                creds = flow.run_local_server(port=0)
+
+            with open(token_path, 'w') as token:
+                token.write(creds.to_json())
+
+        client = gspread.authorize(creds)
         return client
 
     except Exception as e:

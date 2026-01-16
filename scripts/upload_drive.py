@@ -119,15 +119,15 @@ def upload_todays_videos():
     # Get or create the videos folder
     folder_id = get_or_create_folder(service, FOLDER_NAME)
 
-    # Find today's videos (format: YYYYMMDD_*)
-    today = datetime.now().strftime("%Y%m%d")
-    video_files = list(OUTPUT_PATH.glob(f"{today}*.mp4"))
+    # Find videos for tomorrow (morning pipeline generates for next day's games)
+    from datetime import timedelta
+    tomorrow = (datetime.now() + timedelta(days=1)).strftime("%Y%m%d")
+    video_files = list(OUTPUT_PATH.glob(f"{tomorrow}*.mp4"))
 
     if not video_files:
-        # Also check for tomorrow's date (morning pipeline generates for next day)
-        from datetime import timedelta
-        tomorrow = (datetime.now() + timedelta(days=1)).strftime("%Y%m%d")
-        video_files = list(OUTPUT_PATH.glob(f"{tomorrow}*.mp4"))
+        # Fallback to today's date
+        today = datetime.now().strftime("%Y%m%d")
+        video_files = list(OUTPUT_PATH.glob(f"{today}*.mp4"))
 
     if not video_files:
         print("No videos to upload for today")

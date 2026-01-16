@@ -17,6 +17,7 @@ data/*.db
 config/credentials.json
 config/token.json
 config/drive_token.json
+config/sheets_token.json
 
 # OS files
 .DS_Store
