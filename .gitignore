@@ -22,6 +22,7 @@ config/sheets_token.json
 # OS files
 .DS_Store
 Thumbs.db
+*.plist
 
 # IDE
 .vscode/
@@ -29,4 +30,6 @@ Thumbs.db
 
 # Large video files
 base_highlights/
-example_1.mp4
+
+# Claude Code
+.claude/

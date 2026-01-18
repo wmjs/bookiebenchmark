@@ -176,6 +176,51 @@ def run_content_only(limit: int = 1):
     generate_daily_content(date_db, limit=limit)
 
 
+def run_weekly_pipeline(reference_date: str = None, upload: bool = True):
+    """
+    Run the weekly summary video generation pipeline.
+
+    1. Calculate weekly stats
+    2. Generate weekly summary video
+    3. Upload to Google Drive
+    """
+    from scripts.generate_weekly import generate_weekly_content
+    from pathlib import Path
+
+    print("\n" + "="*60)
+    print("BOOKIEBENCHMARK - WEEKLY PIPELINE")
+    print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("="*60)
+
+    # Initialize database
+    init_db()
+
+    # Generate weekly content
+    result = generate_weekly_content(reference_date)
+
+    # Upload to Google Drive if successful
+    if result.get("video_path") and upload:
+        print("\nUploading weekly video to Google Drive...")
+        try:
+            from scripts.upload_drive import get_drive_service, get_or_create_folder, upload_video
+
+            service = get_drive_service()
+            if service:
+                folder_id = get_or_create_folder(service, "BookieBenchmark")
+                video_path = Path(result["video_path"])
+                upload_video(service, str(video_path), folder_id)
+                print(f"Uploaded: {video_path.name}")
+        except Exception as e:
+            print(f"Upload error: {e}")
+
+    print("\n" + "="*60)
+    print("WEEKLY PIPELINE COMPLETE")
+    print(f"Finished at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("="*60)
+
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="BookieBenchmark - AI Sports Prediction Content Generator",
@@ -184,6 +229,7 @@ def main():
 Examples:
   python main.py morning              # Run full morning pipeline
   python main.py evening              # Update yesterday's results
+  python main.py weekly               # Generate weekly summary video
   python main.py morning --skip-content  # Predictions only, no videos
   python main.py predictions          # Test AI API connections
   python main.py content --limit 1    # Generate 1 test video
@@ -200,6 +246,11 @@ Examples:
     # Evening command
     subparsers.add_parser("evening", help="Run evening results update pipeline")
 
+    # Weekly command
+    weekly_parser = subparsers.add_parser("weekly", help="Generate weekly summary video")
+    weekly_parser.add_argument("--date", help="Reference date (YYYY-MM-DD)", default=None)
+    weekly_parser.add_argument("--no-upload", action="store_true", help="Skip uploading to Google Drive")
+
     # Test commands
     subparsers.add_parser("predictions", help="Test predictions only (no content)")
     content_parser = subparsers.add_parser("content", help="Test content generation only")
@@ -214,6 +265,8 @@ Examples:
         run_morning_pipeline(skip_content=args.skip_content, content_limit=args.limit)
     elif args.command == "evening":
         run_evening_pipeline()
+    elif args.command == "weekly":
+        run_weekly_pipeline(reference_date=args.date, upload=not args.no_upload)
     elif args.command == "predictions":
         run_predictions_only()
     elif args.command == "content":

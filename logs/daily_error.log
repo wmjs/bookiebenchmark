@@ -88,3 +88,63 @@ Traceback (most recent call last):
   File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/imageio_ffmpeg/_utils.py", line 33, in get_ffmpeg_exe
     raise RuntimeError(
 RuntimeError: No ffmpeg exe could be found. Install ffmpeg on your system, or set the IMAGEIO_FFMPEG_EXE environment variable.
+Traceback (most recent call last):
+  File "/Users/williamshiber/Desktop/githubpage/bookiebenchmark/main.py", line 282, in <module>
+    main()
+  File "/Users/williamshiber/Desktop/githubpage/bookiebenchmark/main.py", line 265, in main
+    run_morning_pipeline(skip_content=args.skip_content, content_limit=args.limit)
+  File "/Users/williamshiber/Desktop/githubpage/bookiebenchmark/main.py", line 40, in run_morning_pipeline
+    from scripts.generate_content import generate_daily_content
+  File "/Users/williamshiber/Desktop/githubpage/bookiebenchmark/scripts/generate_content.py", line 16, in <module>
+    from utils.video import generate_video
+  File "/Users/williamshiber/Desktop/githubpage/bookiebenchmark/utils/video.py", line 11, in <module>
+    from moviepy.editor import (
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/editor.py", line 36, in <module>
+    from .video.io.VideoFileClip import VideoFileClip
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/video/io/VideoFileClip.py", line 3, in <module>
+    from moviepy.audio.io.AudioFileClip import AudioFileClip
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/audio/io/AudioFileClip.py", line 3, in <module>
+    from moviepy.audio.AudioClip import AudioClip
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/audio/AudioClip.py", line 7, in <module>
+    from moviepy.audio.io.ffmpeg_audiowriter import ffmpeg_audiowrite
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/audio/io/ffmpeg_audiowriter.py", line 7, in <module>
+    from moviepy.config import get_setting
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/config.py", line 36, in <module>
+    FFMPEG_BINARY = get_exe()
+                    ^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/imageio/plugins/ffmpeg.py", line 173, in get_exe
+    return imageio_ffmpeg.get_ffmpeg_exe()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/imageio_ffmpeg/_utils.py", line 33, in get_ffmpeg_exe
+    raise RuntimeError(
+RuntimeError: No ffmpeg exe could be found. Install ffmpeg on your system, or set the IMAGEIO_FFMPEG_EXE environment variable.
+Traceback (most recent call last):
+  File "/Users/williamshiber/Desktop/githubpage/bookiebenchmark/main.py", line 282, in <module>
+    main()
+  File "/Users/williamshiber/Desktop/githubpage/bookiebenchmark/main.py", line 265, in main
+    run_morning_pipeline(skip_content=args.skip_content, content_limit=args.limit)
+  File "/Users/williamshiber/Desktop/githubpage/bookiebenchmark/main.py", line 40, in run_morning_pipeline
+    from scripts.generate_content import generate_daily_content
+  File "/Users/williamshiber/Desktop/githubpage/bookiebenchmark/scripts/generate_content.py", line 16, in <module>
+    from utils.video import generate_video
+  File "/Users/williamshiber/Desktop/githubpage/bookiebenchmark/utils/video.py", line 11, in <module>
+    from moviepy.editor import (
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/editor.py", line 36, in <module>
+    from .video.io.VideoFileClip import VideoFileClip
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/video/io/VideoFileClip.py", line 3, in <module>
+    from moviepy.audio.io.AudioFileClip import AudioFileClip
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/audio/io/AudioFileClip.py", line 3, in <module>
+    from moviepy.audio.AudioClip import AudioClip
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/audio/AudioClip.py", line 7, in <module>
+    from moviepy.audio.io.ffmpeg_audiowriter import ffmpeg_audiowrite
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/audio/io/ffmpeg_audiowriter.py", line 7, in <module>
+    from moviepy.config import get_setting
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/moviepy/config.py", line 36, in <module>
+    FFMPEG_BINARY = get_exe()
+                    ^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/imageio/plugins/ffmpeg.py", line 173, in get_exe
+    return imageio_ffmpeg.get_ffmpeg_exe()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/imageio_ffmpeg/_utils.py", line 33, in get_ffmpeg_exe
+    raise RuntimeError(
+RuntimeError: No ffmpeg exe could be found. Install ffmpeg on your system, or set the IMAGEIO_FFMPEG_EXE environment variable.

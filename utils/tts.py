@@ -18,34 +18,6 @@ VOICES = {
 DEFAULT_VOICE = "en-US-GuyNeural"
 
 
-async def generate_tts_async(
-    text: str,
-    output_path: str,
-    voice: str = DEFAULT_VOICE,
-    rate: str = "+20%",
-    pitch: str = "+5Hz"
-) -> Optional[str]:
-    """Generate TTS audio file asynchronously."""
-    try:
-        communicate = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch)
-        await communicate.save(output_path)
-        return output_path
-    except Exception as e:
-        print(f"TTS error: {e}")
-        return None
-
-
-def generate_tts(
-    text: str,
-    output_path: str,
-    voice: str = DEFAULT_VOICE,
-    rate: str = "+25%",
-    pitch: str = "+5Hz"
-) -> Optional[str]:
-    """Synchronous wrapper for TTS generation."""
-    return asyncio.run(generate_tts_async(text, output_path, voice, rate, pitch))
-
-
 def estimate_word_timings(text: str, audio_duration: float) -> list:
     """
     Estimate word timings based on text and audio duration.

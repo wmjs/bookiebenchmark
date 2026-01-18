@@ -407,6 +407,317 @@ def generate_video(
         return None
 
 
+def create_leaderboard_frame(
+    leaderboard: list,
+    width: int = OUTPUT_WIDTH,
+    height: int = 800
+) -> np.ndarray:
+    """Create a leaderboard display frame showing all AI rankings."""
+    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    try:
+        title_font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Impact.ttf", 70)
+        rank_font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Impact.ttf", 55)
+    except:
+        try:
+            title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 70)
+            rank_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 55)
+        except:
+            title_font = ImageFont.load_default()
+            rank_font = ImageFont.load_default()
+
+    # Title with outline
+    title = "AI LEADERBOARD"
+    title_bbox = draw.textbbox((0, 0), title, font=title_font)
+    title_x = (width - (title_bbox[2] - title_bbox[0])) // 2
+    title_y = 20
+
+    # Draw title outline
+    for dx in range(-4, 5):
+        for dy in range(-4, 5):
+            draw.text((title_x + dx, title_y + dy), title, font=title_font, fill=(0, 0, 0, 255))
+    draw.text((title_x, title_y), title, font=title_font, fill=(255, 215, 0, 255))
+
+    # Rank colors
+    rank_colors = [
+        (255, 215, 0, 255),    # Gold
+        (192, 192, 192, 255),  # Silver
+        (205, 127, 50, 255),   # Bronze
+        (255, 255, 255, 255),  # White
+    ]
+
+    # Draw each rank
+    y_offset = 130
+    row_height = 160
+
+    for i, entry in enumerate(leaderboard[:4]):
+        y = y_offset + (i * row_height)
+        color = rank_colors[i] if i < len(rank_colors) else (255, 255, 255, 255)
+
+        # Rank number
+        rank_text = f"#{entry['rank']}"
+
+        # Model name and stats
+        model_text = f"{entry['model_name']}"
+        stats_text = f"{entry['win_rate']}% ({entry['record']})"
+
+        # Draw rank with outline
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                draw.text((60 + dx, y + dy), rank_text, font=rank_font, fill=(0, 0, 0, 255))
+        draw.text((60, y), rank_text, font=rank_font, fill=color)
+
+        # Draw model name
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                draw.text((180 + dx, y + dy), model_text, font=rank_font, fill=(0, 0, 0, 255))
+        draw.text((180, y), model_text, font=rank_font, fill=(255, 255, 255, 255))
+
+        # Draw stats
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                draw.text((550 + dx, y + dy), stats_text, font=rank_font, fill=(0, 0, 0, 255))
+        draw.text((550, y), stats_text, font=rank_font, fill=color)
+
+    return np.array(img)
+
+
+def create_report_card_frame(
+    card: dict,
+    width: int = OUTPUT_WIDTH,
+    height: int = 350
+) -> np.ndarray:
+    """Create a report card frame for a single AI model."""
+    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    try:
+        name_font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Impact.ttf", 65)
+        stats_font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Impact.ttf", 45)
+        indicator_font = ImageFont.truetype("/System/Library/Fonts/Supplemental/Apple Color Emoji.ttc", 60)
+    except:
+        try:
+            name_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 65)
+            stats_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 45)
+            indicator_font = stats_font
+        except:
+            name_font = ImageFont.load_default()
+            stats_font = ImageFont.load_default()
+            indicator_font = stats_font
+
+    # Model name
+    name_text = card["model_name"].upper()
+    name_bbox = draw.textbbox((0, 0), name_text, font=name_font)
+    name_x = (width - (name_bbox[2] - name_bbox[0])) // 2
+    name_y = 20
+
+    # Name outline and text
+    for dx in range(-4, 5):
+        for dy in range(-4, 5):
+            draw.text((name_x + dx, name_y + dy), name_text, font=name_font, fill=(0, 0, 0, 255))
+    draw.text((name_x, name_y), name_text, font=name_font, fill=(255, 255, 255, 255))
+
+    # Weekly record
+    record_text = f"This Week: {card['weekly_record']} ({card['weekly_win_rate']}%)"
+    record_bbox = draw.textbbox((0, 0), record_text, font=stats_font)
+    record_x = (width - (record_bbox[2] - record_bbox[0])) // 2
+    record_y = 110
+
+    for dx in range(-3, 4):
+        for dy in range(-3, 4):
+            draw.text((record_x + dx, record_y + dy), record_text, font=stats_font, fill=(0, 0, 0, 255))
+    draw.text((record_x, record_y), record_text, font=stats_font, fill=(255, 255, 255, 255))
+
+    # Streak info
+    streak = card.get("streak", {})
+    if streak.get("type") and streak.get("count", 0) > 0:
+        streak_text = f"Streak: {streak['count']}{streak['type']}"
+        streak_bbox = draw.textbbox((0, 0), streak_text, font=stats_font)
+        streak_x = (width - (streak_bbox[2] - streak_bbox[0])) // 2
+        streak_y = 175
+
+        streak_color = (255, 100, 100, 255) if streak["type"] == "L" else (100, 255, 100, 255)
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                draw.text((streak_x + dx, streak_y + dy), streak_text, font=stats_font, fill=(0, 0, 0, 255))
+        draw.text((streak_x, streak_y), streak_text, font=stats_font, fill=streak_color)
+
+    # Indicators (emoji-like text labels)
+    indicators = card.get("indicators", [])
+    if indicators:
+        indicator_map = {
+            "fire": "HOT",
+            "ice": "COLD",
+            "crown": "LEADER"
+        }
+        indicator_text = " | ".join(indicator_map.get(i, i.upper()) for i in indicators)
+        ind_bbox = draw.textbbox((0, 0), indicator_text, font=stats_font)
+        ind_x = (width - (ind_bbox[2] - ind_bbox[0])) // 2
+        ind_y = 260
+
+        # Color based on indicator
+        ind_color = (255, 165, 0, 255)  # Orange default
+        if "fire" in indicators:
+            ind_color = (255, 100, 50, 255)  # Fire orange
+        elif "ice" in indicators:
+            ind_color = (100, 200, 255, 255)  # Ice blue
+        elif "crown" in indicators:
+            ind_color = (255, 215, 0, 255)  # Gold
+
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                draw.text((ind_x + dx, ind_y + dy), indicator_text, font=stats_font, fill=(0, 0, 0, 255))
+        draw.text((ind_x, ind_y), indicator_text, font=stats_font, fill=ind_color)
+
+    return np.array(img)
+
+
+def generate_weekly_video(
+    script: str,
+    audio_path: str,
+    word_timings: list,
+    report: dict,
+    output_filename: str
+) -> Optional[str]:
+    """
+    Generate a weekly recap video with leaderboard and report cards.
+
+    Args:
+        script: Voiceover script text
+        audio_path: Path to audio file
+        word_timings: Word timing data from TTS
+        report: Weekly report dictionary from calculate_weekly_report()
+        output_filename: Output filename
+
+    Returns:
+        Path to generated video or None if failed
+    """
+    try:
+        # Load audio to get duration
+        audio = AudioFileClip(audio_path)
+        audio_duration = audio.duration
+        video_duration = audio_duration + 0.5
+
+        # Get random background clip
+        print("  Extracting background clip...")
+        background = get_random_clip(duration=video_duration + 1)
+        background = crop_to_vertical(background)
+        background = background.subclip(0, video_duration)
+        background = background.set_audio(None)
+
+        overlay_clips = []
+
+        # === LEADERBOARD (first 12 seconds or so) ===
+        print("  Creating leaderboard...")
+        leaderboard = report.get("overall_leaderboard", [])
+        if leaderboard:
+            leaderboard_img = create_leaderboard_frame(leaderboard)
+            leaderboard_y = int(OUTPUT_HEIGHT * 0.15)
+            leaderboard_duration = min(12.0, video_duration * 0.5)
+
+            leaderboard_clip = (
+                ImageClip(leaderboard_img)
+                .set_position(("center", leaderboard_y))
+                .set_start(0)
+                .set_duration(leaderboard_duration)
+            )
+            overlay_clips.append(leaderboard_clip)
+
+        # === REPORT CARDS (cycle through them after leaderboard) ===
+        print("  Creating report cards...")
+        report_cards = report.get("weekly_report_cards", [])
+        card_start_time = min(12.0, video_duration * 0.5)
+        remaining_time = video_duration - card_start_time - 1.0  # Leave 1s at end
+        card_duration = remaining_time / max(len(report_cards), 1)
+        card_duration = min(card_duration, 4.0)  # Cap at 4 seconds each
+
+        for i, card in enumerate(report_cards):
+            card_img = create_report_card_frame(card)
+            card_y = int(OUTPUT_HEIGHT * 0.20)
+            start = card_start_time + (i * card_duration)
+
+            if start >= video_duration - 0.5:
+                break
+
+            card_clip = (
+                ImageClip(card_img)
+                .set_position(("center", card_y))
+                .set_start(start)
+                .set_duration(min(card_duration, video_duration - start - 0.1))
+            )
+            overlay_clips.append(card_clip)
+            print(f"    {card['model_name']}: {start:.1f}s - {start + card_duration:.1f}s")
+
+        # === AI LOGOS alongside report cards ===
+        print("  Adding AI logos...")
+        for i, card in enumerate(report_cards):
+            model_name = card["model_name"].lower()
+            logo_file = AI_LOGOS.get(model_name)
+
+            if logo_file:
+                logo_path = LOGOS_PATH / logo_file
+                if logo_path.exists():
+                    start = card_start_time + (i * card_duration)
+                    if start >= video_duration - 0.5:
+                        break
+
+                    ai_logo_array = create_logo_clip(str(logo_path), size=250)
+                    ai_logo_x = (OUTPUT_WIDTH - 250) // 2
+                    ai_logo_y = int(OUTPUT_HEIGHT * 0.55)
+
+                    ai_logo = (
+                        ImageClip(ai_logo_array)
+                        .set_position((ai_logo_x, ai_logo_y))
+                        .set_start(start)
+                        .set_duration(min(card_duration, video_duration - start - 0.1))
+                    )
+                    overlay_clips.append(ai_logo)
+
+        # === ANIMATED CAPTIONS ===
+        print("  Creating animated captions...")
+        caption_clips = create_animated_captions(word_timings, video_duration)
+
+        # === COMPOSE FINAL VIDEO ===
+        print("  Compositing video...")
+        all_clips = [background] + overlay_clips + caption_clips
+        final = CompositeVideoClip(all_clips, size=(OUTPUT_WIDTH, OUTPUT_HEIGHT))
+        final = final.set_duration(audio_duration)
+
+        # Add audio
+        audio_trimmed = audio.subclip(0, audio_duration)
+        final = final.set_audio(audio_trimmed)
+
+        # Output path
+        output_path = OUTPUT_PATH / output_filename
+        OUTPUT_PATH.mkdir(exist_ok=True)
+
+        # Write video
+        print("  Rendering video...")
+        final.write_videofile(
+            str(output_path),
+            fps=FPS,
+            codec="libx264",
+            audio_codec="aac",
+            preset="medium",
+            threads=4,
+            logger=None
+        )
+
+        # Cleanup
+        background.close()
+        audio.close()
+        final.close()
+
+        return str(output_path)
+
+    except Exception as e:
+        print(f"Weekly video generation error: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
 if __name__ == "__main__":
     print("Testing video utilities...")
     try:

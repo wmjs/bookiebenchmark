@@ -29,6 +29,35 @@ def get_random_intro():
     """Get a random intro hook for variety."""
     return random.choice(INTRO_HOOKS)
 
+
+# Weekly video project intro hooks
+WEEKLY_PROJECT_INTROS = [
+    "Welcome to the AI Prediction Benchmark!",
+    "Which AI is BEST at sports predictions?",
+    "Four AIs battle to prove who's the smartest!",
+    "We're testing AI on the hardest game: sports betting.",
+    "The ultimate AI showdown continues!",
+    "Can AI beat the spread? Let's find out!",
+    "Four models. One goal. Beat the odds.",
+]
+
+# Weekly video intro hooks
+WEEKLY_INTRO_HOOKS = [
+    "It's time for the WEEKLY RECAP!",
+    "THE RESULTS ARE IN!",
+    "WEEKLY SHOWDOWN UPDATE!",
+    "HERE'S HOW THE AIs DID!",
+    "THE MACHINES HAVE BEEN TESTED!",
+    "WEEKLY LEADERBOARD DROP!",
+    "TIME TO CROWN A WINNER!",
+    "THE WEEKLY BATTLE RESULTS!",
+]
+
+
+def get_random_weekly_intro():
+    """Get random project intro and weekly intro hook."""
+    return random.choice(WEEKLY_PROJECT_INTROS), random.choice(WEEKLY_INTRO_HOOKS)
+
 PREDICTION_PROMPT = """You are a sports analyst AI making NBA game predictions.
 
 Today's Date: {today_date}
@@ -79,6 +108,37 @@ TONE: Dramatic, slightly unhinged, rage-bait friendly. Think sports talk radio m
 LENGTH: STRICTLY 50-70 words maximum. This is critical - the video must be under 25 seconds.
 
 Respond with ONLY the voiceover script text, no formatting or labels. Do NOT exceed 70 words.
+"""
+
+WEEKLY_SCRIPT_TEMPLATE = """Generate a dramatic voiceover script for a weekly AI prediction recap video.
+
+PROJECT CONTEXT: We're benchmarking AI models to see which one is best at predicting NBA games.
+
+WEEKLY STATS:
+- Week: {week_start} to {week_end}
+- Total games: {total_games}
+
+OVERALL LEADERBOARD (all-time):
+{leaderboard}
+
+WEEKLY PERFORMANCE:
+{weekly_stats}
+
+STREAK INFO:
+{streak_callout}
+
+REQUIREMENTS:
+1. Start with: "{project_intro}"
+2. Then: "{intro_hook}"
+3. Announce the overall leader dramatically
+4. Highlight any hot/cold streaks
+5. End with engagement hook (question or challenge)
+
+TONE: Hype, dramatic, sports broadcaster energy. Make it engaging!
+
+LENGTH: STRICTLY 60-80 words. This is critical for video timing.
+
+Respond with ONLY the voiceover script text, no formatting or labels.
 """
 
 # Team name mappings

@@ -244,6 +244,109 @@ def get_model_stats() -> list:
     return stats
 
 
+def get_weekly_stats(start_date: str, end_date: str) -> dict:
+    """
+    Get model performance stats for a specific date range.
+
+    Args:
+        start_date: Start date (YYYY-MM-DD)
+        end_date: End date (YYYY-MM-DD)
+
+    Returns:
+        Dictionary with model stats for the period
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            p.model_name,
+            COUNT(*) as total_predictions,
+            SUM(CASE WHEN p.is_correct = 1 THEN 1 ELSE 0 END) as correct_predictions,
+            ROUND(100.0 * SUM(CASE WHEN p.is_correct = 1 THEN 1 ELSE 0 END) / COUNT(*), 1) as win_rate,
+            ROUND(AVG(p.confidence), 1) as avg_confidence,
+            SUM(CASE WHEN p.is_correct = 1 AND p.confidence >= 70 THEN 1 ELSE 0 END) as high_conf_correct,
+            SUM(CASE WHEN p.confidence >= 70 THEN 1 ELSE 0 END) as high_conf_total
+        FROM predictions p
+        JOIN games g ON p.game_id = g.game_id
+        WHERE g.game_date >= ? AND g.game_date <= ?
+            AND p.is_correct IS NOT NULL
+        GROUP BY p.model_name
+        ORDER BY win_rate DESC
+    """, (start_date, end_date))
+
+    stats = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return stats
+
+
+def get_model_streak(model_name: str) -> dict:
+    """
+    Get current win/loss streak for a model.
+
+    Args:
+        model_name: Name of the AI model
+
+    Returns:
+        Dictionary with streak info (type: 'W' or 'L', count: int)
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Get most recent predictions with results, ordered by date descending
+    cursor.execute("""
+        SELECT p.is_correct, g.game_date
+        FROM predictions p
+        JOIN games g ON p.game_id = g.game_id
+        WHERE p.model_name = ? AND p.is_correct IS NOT NULL
+        ORDER BY g.game_date DESC, g.game_id DESC
+        LIMIT 20
+    """, (model_name,))
+
+    results = cursor.fetchall()
+    conn.close()
+
+    if not results:
+        return {"type": None, "count": 0}
+
+    # Count consecutive same results
+    first_result = results[0]['is_correct']
+    streak_type = 'W' if first_result == 1 else 'L'
+    streak_count = 0
+
+    for row in results:
+        if row['is_correct'] == first_result:
+            streak_count += 1
+        else:
+            break
+
+    return {"type": streak_type, "count": streak_count}
+
+
+def get_all_model_streaks() -> dict:
+    """Get current streaks for all models."""
+    from config.prompts import AI_MODELS
+
+    streaks = {}
+    for model_name in AI_MODELS.keys():
+        streaks[model_name] = get_model_streak(model_name)
+    return streaks
+
+
+def get_total_games_in_range(start_date: str, end_date: str) -> int:
+    """Get total number of games with results in a date range."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT COUNT(*) as count
+        FROM games
+        WHERE game_date >= ? AND game_date <= ? AND winner IS NOT NULL
+    """, (start_date, end_date))
+    result = cursor.fetchone()
+    conn.close()
+    return result['count'] if result else 0
+
+
 def get_interesting_matchups(date: str, limit: int = 3) -> list:
     """
     Get the most interesting matchups for content creation.

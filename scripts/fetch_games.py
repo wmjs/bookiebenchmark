@@ -110,16 +110,10 @@ def fetch_and_store_games(date: Optional[str] = None) -> list:
     return games
 
 
-def get_tomorrow_games() -> list:
-    """Convenience function to get tomorrow's games."""
-    tomorrow = datetime.now() + timedelta(days=1)
-    date_str = tomorrow.strftime("%Y%m%d")
-    return fetch_and_store_games(date_str)
-
-
 if __name__ == "__main__":
     print("Fetching tomorrow's NBA games...")
-    games = get_tomorrow_games()
+    tomorrow = datetime.now() + timedelta(days=1)
+    games = fetch_and_store_games(tomorrow.strftime("%Y%m%d"))
     print(f"\nFound {len(games)} games for tomorrow:")
     for game in games:
         print(f"  {game['away_team']} @ {game['home_team']}")

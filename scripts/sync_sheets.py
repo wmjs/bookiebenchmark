@@ -12,7 +12,8 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent.parent / "config" / ".env")
 
-from utils.database import get_connection, get_model_stats
+from utils.database import get_connection, get_model_stats, get_weekly_stats
+from utils.weekly_stats import get_week_date_range
 
 
 def get_gspread_client():
@@ -140,7 +141,36 @@ def sync_to_sheets():
 
     stats_sheet.clear()
     stats_sheet.update(range_name="A1", values=stats_data)
-    print(f"Synced stats for {len(model_stats)} models")
+    print(f"Synced overall stats for {len(model_stats)} models")
+
+    # --- WEEKLY STATS SHEET ---
+    try:
+        weekly_sheet = spreadsheet.worksheet("Weekly Stats")
+    except:
+        weekly_sheet = spreadsheet.add_worksheet("Weekly Stats", rows=20, cols=10)
+
+    # Get this week's stats
+    start_date, end_date = get_week_date_range()
+    weekly_stats = get_weekly_stats(start_date, end_date)
+
+    weekly_data = [
+        [f"Week: {start_date} to {end_date}"],
+        ["Model", "Predictions", "Correct", "Win Rate %", "Avg Confidence", "High Conf Correct", "High Conf Total"]
+    ]
+    for stat in weekly_stats:
+        weekly_data.append([
+            stat["model_name"],
+            stat["total_predictions"],
+            stat["correct_predictions"],
+            stat["win_rate"],
+            stat["avg_confidence"],
+            stat.get("high_conf_correct", 0),
+            stat.get("high_conf_total", 0)
+        ])
+
+    weekly_sheet.clear()
+    weekly_sheet.update(range_name="A1", values=weekly_data)
+    print(f"Synced weekly stats ({start_date} to {end_date}) for {len(weekly_stats)} models")
 
     # --- UPCOMING GAMES SHEET ---
     try:
