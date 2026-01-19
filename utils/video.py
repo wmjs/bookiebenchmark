@@ -142,7 +142,7 @@ def create_caption_frame(
     text: str,
     width: int = OUTPUT_WIDTH,
     height: int = 300,
-    font_size: int = 100,  # Bigger text
+    font_size: int = 75,  # Bigger text
     bg_color: tuple = (0, 0, 0, 0),  # Transparent background
     text_color: tuple = (255, 255, 255, 255),
     outline_thickness: int = 8  # Thicker outline for bigger text
@@ -664,7 +664,7 @@ def generate_weekly_video(
 
                     ai_logo_array = create_logo_clip(str(logo_path), size=250)
                     ai_logo_x = (OUTPUT_WIDTH - 250) // 2
-                    ai_logo_y = int(OUTPUT_HEIGHT * 0.55)
+                    ai_logo_y = 350
 
                     ai_logo = (
                         ImageClip(ai_logo_array)
